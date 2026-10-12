@@ -279,14 +279,6 @@
     const h = Number(new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
     return h >= 5 && h < 12 ? 'Bom dia' : h >= 12 && h < 18 ? 'Boa tarde' : 'Boa noite';
   }
-  // Data de amanhã no horário de Brasília, ex.: "terça-feira, 13/10"
-  function amanha() {
-    const [d, m, y] = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date()).split('/').map(Number);
-    const t = new Date(Date.UTC(y, m - 1, d + 1, 12));
-    const dia = new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC', weekday: 'long' }).format(t);
-    const data = new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC', day: '2-digit', month: '2-digit' }).format(t);
-    return `${dia}, ${data}`;
-  }
   function atualizarSaudacao() { $('greet').innerHTML = `${saudacao()}, eu sou a <em>GenIA.</em>`; }
   atualizarSaudacao();
   setInterval(atualizarSaudacao, 60000);
@@ -383,13 +375,13 @@
       await botSay(
         `Prontinho! Recebi todas as suas respostas. 🎉
 <div class="done-card"><span class="big"><svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.2l2.3 2.3 4.7-5"/></svg></span><div><strong>Tudo registrado</strong><ul><li>E-mail: ${esc(state.email)}</li><li>Pergunta recebida</li></ul></div></div>
-Agora é comigo! Sua resposta não chega na hora: vou preparar tudo com calma e te mando <strong>amanhã</strong>.
+Agora é comigo! Sua resposta não chega na hora: vou preparar tudo com calma e te mando <strong>em breve</strong>.
 <ol class="timeline">
 <li class="tl done"><span class="tl-dot">${CHECK}</span><div><div class="tl-when">Hoje</div><div class="tl-what">Você enviou sua pergunta</div></div></li>
 <li class="tl now"><span class="tl-dot"></span><div><div class="tl-when">Em preparo</div><div class="tl-what">A GenIA está preparando sua resposta</div></div></li>
-<li class="tl next"><span class="tl-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span><div><div class="tl-when">Amanhã · ${amanha()}</div><div class="tl-what">Resposta no e-mail ${esc(state.email)}</div></div></li>
+<li class="tl next"><span class="tl-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span><div><div class="tl-when">Em breve</div><div class="tl-what">Resposta no e-mail ${esc(state.email)}</div></div></li>
 </ol>
-Fica de olho na caixa de entrada amanhã (e no spam, só por garantia 😉).
+Fica de olho na caixa de entrada (e no spam, só por garantia 😉).
 <button class="restart" type="button" id="restart">Fazer outra pergunta</button>`, 1200);
       $('restart').onclick = restart;
     } catch (e) {
