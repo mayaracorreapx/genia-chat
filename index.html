@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>GenIA</title>
 <link rel="icon" type="image/png" href="genia.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -49,6 +49,8 @@
     font-family: Inter, system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     display: flex; flex-direction: column;
+    height: 100dvh; /* acompanha a barra do Safari e o teclado no iPad/iPhone */
+    -webkit-text-size-adjust: 100%;
     transition: background .25s, color .25s;
   }
   button { font: inherit; color: inherit; }
@@ -131,7 +133,7 @@
   .restart:hover { border-color: var(--soft); }
 
   /* Composer */
-  .composer-zone { flex: none; padding: 12px 0 20px; background: linear-gradient(transparent, var(--bg) 30%); }
+  .composer-zone { flex: none; padding: 12px 0 max(20px, env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--bg) 30%); }
   .composer {
     background: var(--surface); border: 1px solid var(--border); border-radius: 26px; box-shadow: var(--shadow);
     padding: 16px 12px 10px 20px; transition: border-color .2s, box-shadow .2s;
@@ -196,7 +198,7 @@
     <section class="hero">
       <div class="hero-bar"></div>
       <div>
-        <div class="eyebrow">GENIA</div>
+        <div class="eyebrow">LURIA ONE</div>
         <h1 id="greet">Olá, eu sou a <em>GenIA.</em></h1>
         <p>Me conta o que você quer saber. Eu registro sua pergunta e envio a resposta direto no seu e-mail.</p>
       </div>
@@ -250,8 +252,14 @@
   };
 
   // Saudação conforme o horário
-  const h = new Date().getHours();
-  $('greet').innerHTML = `${h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'}, eu sou a <em>GenIA.</em>`;
+  // Sempre no horário de Brasília, independente do fuso do aparelho
+  function saudacao() {
+    const h = Number(new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
+    return h >= 5 && h < 12 ? 'Bom dia' : h >= 12 && h < 18 ? 'Boa tarde' : 'Boa noite';
+  }
+  function atualizarSaudacao() { $('greet').innerHTML = `${saudacao()}, eu sou a <em>GenIA.</em>`; }
+  atualizarSaudacao();
+  setInterval(atualizarSaudacao, 60000);
 
   function scrollDown() { requestAnimationFrame(() => scroller.scrollTop = scroller.scrollHeight); }
   function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
