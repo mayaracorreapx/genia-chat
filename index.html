@@ -129,6 +129,28 @@
   .done-card ul { margin: 6px 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }
   .done-card li { display: flex; gap: 6px; align-items: center; }
   .done-card li::before { content: "✓"; color: var(--ok); font-weight: 700; }
+
+  /* Linha do tempo da entrega */
+  .timeline { list-style: none; margin: 14px 0 4px; padding: 0; white-space: normal; }
+  .tl { position: relative; display: flex; gap: 12px; padding-bottom: 16px; animation: rise .4s ease both; }
+  .tl:nth-child(2) { animation-delay: .25s; } .tl:nth-child(3) { animation-delay: .5s; }
+  .tl:last-child { padding-bottom: 0; }
+  .tl:not(:last-child)::after {
+    content: ""; position: absolute; left: 11px; top: 26px; bottom: 2px; width: 2px;
+    background: repeating-linear-gradient(var(--border) 0 4px, transparent 4px 8px);
+  }
+  .tl:first-child::after { background: linear-gradient(var(--ok), var(--purple)); }
+  .tl-dot { width: 24px; height: 24px; border-radius: 50%; flex: none; display: grid; place-items: center; position: relative; z-index: 1; }
+  .tl.done .tl-dot { background: var(--ok); }
+  .tl.now .tl-dot { background: color-mix(in srgb, var(--purple) 14%, var(--surface)); }
+  .tl.now .tl-dot::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--purple); animation: pulse 1.6s ease-in-out infinite; }
+  .tl.next .tl-dot { background: var(--surface); border: 2px solid var(--navy); color: var(--navy); }
+  .tl-when { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--soft); }
+  .tl.now .tl-when { color: var(--purple); }
+  .tl.next .tl-when { color: var(--navy); }
+  .tl-what { font-size: 14.5px; line-height: 1.4; margin-top: 2px; }
+  .tl.next .tl-what { font-weight: 600; }
+  @keyframes pulse { 0%, 100% { transform: scale(.75); opacity: .6; } 50% { transform: scale(1.1); opacity: 1; } }
   .restart { margin-top: 12px; border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 8px 14px; cursor: pointer; font-size: 14px; }
   .restart:hover { border-color: var(--soft); }
 
@@ -257,6 +279,14 @@
     const h = Number(new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
     return h >= 5 && h < 12 ? 'Bom dia' : h >= 12 && h < 18 ? 'Boa tarde' : 'Boa noite';
   }
+  // Data de amanhã no horário de Brasília, ex.: "terça-feira, 13/10"
+  function amanha() {
+    const [d, m, y] = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date()).split('/').map(Number);
+    const t = new Date(Date.UTC(y, m - 1, d + 1, 12));
+    const dia = new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC', weekday: 'long' }).format(t);
+    const data = new Intl.DateTimeFormat('pt-BR', { timeZone: 'UTC', day: '2-digit', month: '2-digit' }).format(t);
+    return `${dia}, ${data}`;
+  }
   function atualizarSaudacao() { $('greet').innerHTML = `${saudacao()}, eu sou a <em>GenIA.</em>`; }
   atualizarSaudacao();
   setInterval(atualizarSaudacao, 60000);
@@ -353,7 +383,13 @@
       await botSay(
         `Prontinho! Recebi todas as suas respostas. 🎉
 <div class="done-card"><span class="big"><svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.2l2.3 2.3 4.7-5"/></svg></span><div><strong>Tudo registrado</strong><ul><li>E-mail: ${esc(state.email)}</li><li>Pergunta recebida</li></ul></div></div>
-A resposta da sua pergunta vai chegar no e-mail <strong>${esc(state.email)}</strong>. Fica de olho na caixa de entrada (e no spam, só por garantia 😉).
+Agora é comigo! Sua resposta não chega na hora: vou preparar tudo com calma e te mando <strong>amanhã</strong>.
+<ol class="timeline">
+<li class="tl done"><span class="tl-dot">${CHECK}</span><div><div class="tl-when">Hoje</div><div class="tl-what">Você enviou sua pergunta</div></div></li>
+<li class="tl now"><span class="tl-dot"></span><div><div class="tl-when">Em preparo</div><div class="tl-what">A GenIA está preparando sua resposta</div></div></li>
+<li class="tl next"><span class="tl-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg></span><div><div class="tl-when">Amanhã · ${amanha()}</div><div class="tl-what">Resposta no e-mail ${esc(state.email)}</div></div></li>
+</ol>
+Fica de olho na caixa de entrada amanhã (e no spam, só por garantia 😉).
 <button class="restart" type="button" id="restart">Fazer outra pergunta</button>`, 1200);
       $('restart').onclick = restart;
     } catch (e) {
